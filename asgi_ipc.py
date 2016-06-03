@@ -149,6 +149,7 @@ class IPCChannelLayer(BaseChannelLayer):
 
     def _group_path(self, group):
         assert isinstance(group, six.text_type)
+        assert group.find('/') == -1
         return "/%s-group-%s" % (self.prefix, group.encode("ascii"))
 
     def _channel_list(self, channel):
