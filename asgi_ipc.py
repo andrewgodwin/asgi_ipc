@@ -229,7 +229,7 @@ class MessageTable(SqliteTable):
     table_name = 'messages'
     table_structure = '''
         CREATE TABLE IF NOT EXISTS messages
-        (channel text, message text, expiry datetime)
+        (id integer primary key, channel text, message text, expiry datetime)
     '''
 
     def get_messages(self, channel) -> list:
@@ -242,12 +242,12 @@ class MessageTable(SqliteTable):
         self._execute('INSERT INTO {table} (channel, message, expiry) VALUES (?,?,?)', channel, message, expiry)
 
     def pop_message(self, channel) -> tuple:
-        result = self._execute('SELECT message, expiry FROM {table} WHERE channel=? LIMIT 1', channel)
+        result = self._execute('SELECT id, message, expiry FROM {table} WHERE channel=? LIMIT 1', channel)
         if not result:
             raise ValueError('No message in channel')
         result = result[0]
-        self._execute('DELETE FROM {table} WHERE channel=? AND message=? AND expiry=?', channel, result[0], result[1])
-        return result
+        self._execute('DELETE FROM {table} WHERE id=?', result[0])
+        return result[1], result[2]
 
     def __contains__(self, value):
         result = self._execute('SELECT COUNT(*) FROM {table} WHERE channel=?', value)[0][0]
