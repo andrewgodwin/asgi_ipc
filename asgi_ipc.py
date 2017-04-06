@@ -178,13 +178,13 @@ class SqliteTable(object):
     # How long to wait for the semaphore before declaring deadlock and flushing
     death_timeout = 2
 
-    def __init__(self, connection, identifier):
+    def __init__(self, connection):
         self.connection = connection
-        self.identifier = identifier
+        self.identifier = '/' + self.table_name + '-sem'
         # TODO: Investigate having separate read and write locks to allow
         # concurrent reads.
         self.semaphore = posix_ipc.Semaphore(
-            self.identifier + "-sem",
+            self.identifier,
             flags=posix_ipc.O_CREAT,
             mode=0o660,
             initial_value=1,
@@ -200,7 +200,7 @@ class SqliteTable(object):
         # Unlink and remake the semaphore
         self.semaphore.unlink()
         self.semaphore = posix_ipc.Semaphore(
-            self.identifier + "-sem",
+            self.identifier,
             flags=posix_ipc.O_CREX,
             mode=0o660,
             initial_value=1,
