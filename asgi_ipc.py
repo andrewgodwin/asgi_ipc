@@ -232,16 +232,16 @@ class MessageTable(SqliteTable):
         (id integer primary key, channel text, message text, expiry datetime)
     '''
 
-    def get_messages(self, channel) -> list:
+    def get_messages(self, channel):
         return self._execute('SELECT message, expiry FROM {table} WHERE channel=?', channel) or (None, None)
 
-    def get_message_count(self, channel) -> int:
+    def get_message_count(self, channel):
         return self._execute('SELECT COUNT(*) FROM {table} WHERE channel=?', channel)[0][0]
 
     def add_message(self, message, expiry, channel):
         self._execute('INSERT INTO {table} (channel, message, expiry) VALUES (?,?,?)', channel, message, expiry)
 
-    def pop_message(self, channel) -> tuple:
+    def pop_message(self, channel):
         result = self._execute('SELECT id, message, expiry FROM {table} WHERE channel=? LIMIT 1', channel)
         if not result:
             raise ValueError('No message in channel')
