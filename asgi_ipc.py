@@ -1,11 +1,11 @@
 from __future__ import unicode_literals
 
 import msgpack
-from pathlib import Path
 import random
 import six
 import sqlite3
 import string
+import tempfile
 import threading
 import time
 from asgiref.base_layer import BaseChannelLayer
@@ -42,11 +42,10 @@ class IPCChannelLayer(BaseChannelLayer):
         )
         self.thread_lock = threading.Lock()
         self.prefix = prefix
-        path = Path('/tmp') / Path('{prefix}.sqlite'.format(prefix=prefix))
-        connection = sqlite3.connect(str(path))
-        self.message_store = MessageTable(connection, '{}-message'.format(prefix))
+        connection = sqlite3.connect(tempfile.NamedTemporaryFile().name)
+        self.message_store = MessageTable(connection)
         # Set containing all groups to flush
-        self.group_store = GroupTable(connection, '{}-group'.format(prefix))
+        self.group_store = GroupTable(connection)
 
     # --------
     # ASGI API
