@@ -81,10 +81,7 @@ class IPCChannelLayer(BaseChannelLayer):
     def receive(self, channels, block=False):
         if not channels:
             return None, None
-        channels = list(channels)
-        assert all(
-            self.valid_channel_name(channel, receive=True) for channel in channels
-        ), "one or more channel names invalid"
+        assert self.valid_channel_names(channels), "one or more channel names invalid"
         random.shuffle(channels)
         # Try to pop off all of the named channels
         with self.thread_lock:
