@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import msgpack
+import os
 import random
 import six
 import sqlite3
@@ -42,11 +43,13 @@ class IPCChannelLayer(BaseChannelLayer):
         )
         self.thread_lock = threading.Lock()
         self.prefix = prefix
-        connection = sqlite3.connect(tempfile.NamedTemporaryFile().name)
+        temp_dir = tempfile.gettempdir()
+        file_name = prefix + '.sqlite'
+        connection = sqlite3.connect(os.path.join(temp_dir, file_name))
         connection.text_factory = str
-        self.message_store = MessageTable(connection)
+        self.message_store = MessageTable(connection, prefix)
         # Set containing all groups to flush
-        self.group_store = GroupTable(connection)
+        self.group_store = GroupTable(connection, prefix)
 
     # --------
     # ASGI API
@@ -179,9 +182,9 @@ class SqliteTable(object):
     # How long to wait for the semaphore before declaring deadlock and flushing
     death_timeout = 2
 
-    def __init__(self, connection):
+    def __init__(self, connection, identifier):
         self.connection = connection
-        self.identifier = '/' + self.table_name + '-sem'
+        self.identifier = '/' + identifier + self.table_name + '-sem'
         # TODO: Investigate having separate read and write locks to allow
         # concurrent reads.
         self.semaphore = posix_ipc.Semaphore(
