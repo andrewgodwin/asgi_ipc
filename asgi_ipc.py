@@ -43,6 +43,7 @@ class IPCChannelLayer(BaseChannelLayer):
         self.thread_lock = threading.Lock()
         self.prefix = prefix
         connection = sqlite3.connect(tempfile.NamedTemporaryFile().name)
+        connection.text_factory = str
         self.message_store = MessageTable(connection)
         # Set containing all groups to flush
         self.group_store = GroupTable(connection)
