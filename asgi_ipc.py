@@ -6,6 +6,7 @@ import random
 import six
 import sqlite3
 import string
+import sys
 import tempfile
 import threading
 import time
@@ -156,7 +157,10 @@ class IPCChannelLayer(BaseChannelLayer):
                 pass
 
     def group_channels(self, group):
-        return [result[0] for result in self.group_store.get_current_channels(group)]
+        result = [channel[0] for channel in self.group_store.get_current_channels(group)]
+        if sys.version_info[0] == 2:
+            result = [channel.decode() for channel in result]
+        return result
 
     # ---------------
     # Flush extension
